@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "Cascade Dropdown Lists Example";
+}
+
+<h2>Cascade Dropdown Lists Example</h2>
+
+@using (Html.BeginForm())
+{
+    <div>
+        @Html.DropDownList("Countries", ViewBag.Countries as SelectList, "Select a country", new { id = "ddlCountries" })
+    </div>
+    <div>
+        <select id="ddlStates" name="States">
+            <option>--select state--</option>
+        </select>
+    </div>
+    <div>
+        <select id="ddlCities" name="Cities">
+            <option>--select state--</option>
+        </select>
+    </div>
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#ddlCountries").change(function () {
+            var countryId = $(this).val();
+            if (countryId) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("LoadState")', // Corrected URL format
+                    dataType: 'json',
+                    data: { countryId: countryId }, // Corrected parameter name
+                    success: function (data) {
+                        //$("#ddlStates").empty();                        
+                        //$("#ddlStates").append($('<option value="">select state</option>')); // Default option
+                        $.each(data, function (index, state) {
+                            $("#ddlStates").append('<option value="' + state.Value + '">' + state.Text + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $("#ddlStates").empty();
+                $("#ddlCities").empty();
+                $("#ddlStates").append($('<option value="">select state</option>')); 
+                $("#ddlCities").append($('<option value="">select city</option>')); 
+            }
+        });
+
+        $("#ddlStates").change(function () {
+            var stateId = $(this).val();
+            if (stateId) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("LoadCity")', // Corrected URL format
+                    dataType: 'json',
+                    data: { stateId: stateId }, // Corrected parameter name
+                    success: function (data) {
+                        $("#ddlCities").empty();
+                        $.each(data, function (index, city) {
+                            $("#ddlCities").append('<option value="' + city.Value + '">' + city.Text + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $("#ddlCities").empty();
+                $("#ddlCities").append($('<option value="">select city</option>')); 
+            }
+        });
+    });
+</script>
+
+
+@*<script>
+
+        $(document).ready(function () {
+
+
+            $("#ddlCountries").change(function () {
+                debugger
+
+                var countryId = $(this).val();
+                if (countryId) {
+                    $.getJSON("/home/LoadState", { countryId: countryId }, function (states) {
+                        var ddlStates = $("#ddlStates");
+
+                        ddlStates.empty();
+                        ddlStates.append($(`<option value="">Select the state</option>`)); // Default option
+                        $.each(states, function (index, state) {
+                            ddlStates.append($(`<option></option>`).val(state.Value).html(state.Text));
+                        });
+
+                    });
+                }
+            });
+
+            $("#ddlStates").change(function () {
+                var stateId = $(this).val();
+                if (stateId) {
+                    $.getJSON("/home/LoadCity", { stateId: stateId }, function (cities) {
+                        var ddlCities = $("#ddlCities");
+                        ddlCities.empty();
+                        ddlCities.append($(`<option value="">Select City</option>`));
+                        $.each(cities, function (index, city) {
+                            ddlCities.append($("<option></option>").val(city.Value).html(city.Text));
+                        });
+                    });
+                }
+            });
+        });
+
+ </script>*@
+
+
+
